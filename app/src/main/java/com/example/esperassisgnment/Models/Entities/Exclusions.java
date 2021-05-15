@@ -2,10 +2,12 @@ package com.example.esperassisgnment.Models.Entities;
 
 import android.media.session.MediaController;
 
+import androidx.annotation.Nullable;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import com.example.esperassisgnment.Helpers.Constants;
+import com.example.esperassisgnment.Models.Selection;
 
 @Entity(tableName = Constants.EXCLUSION_TABLE)
 public class Exclusions {
@@ -56,4 +58,5 @@ public class Exclusions {
     public void setOptionId2(int optionId2) {
         this.optionId2 = optionId2;
     }
+
 }
