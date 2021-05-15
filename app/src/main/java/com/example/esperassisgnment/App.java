@@ -3,6 +3,7 @@ package com.example.esperassisgnment;
 import android.app.Application;
 
 import com.example.esperassisgnment.Database.AppDatabase;
+import com.squareup.picasso.Picasso;
 
 public class App extends Application {
 
