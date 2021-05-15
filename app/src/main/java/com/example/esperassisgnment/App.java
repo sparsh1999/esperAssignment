@@ -2,9 +2,12 @@ package com.example.esperassisgnment;
 
 import android.app.Application;
 
+import com.example.esperassisgnment.Database.AppDatabase;
+
 public class App extends Application {
 
     private static App app;
+    public AppDatabase db;
 
     public static App getAppInstance(){
         return app;
@@ -14,5 +17,8 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         app = this;
+        db = AppDatabase.databaseConnection(app);
     }
+
+
 }

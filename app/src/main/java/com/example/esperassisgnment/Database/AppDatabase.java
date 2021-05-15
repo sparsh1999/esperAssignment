@@ -9,6 +9,7 @@ import androidx.room.RoomDatabase;
 import com.example.esperassisgnment.Database.dao.ExclusionDAO;
 import com.example.esperassisgnment.Database.dao.FeatureDAO;
 import com.example.esperassisgnment.Database.dao.OptionsDAO;
+import com.example.esperassisgnment.Database.dao.SelectionDAO;
 import com.example.esperassisgnment.Models.Entities.Exclusions;
 import com.example.esperassisgnment.Models.Entities.Feature;
 import com.example.esperassisgnment.Models.Entities.Options;
@@ -20,7 +21,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract FeatureDAO getFeatureDAO();
     public abstract OptionsDAO getOptionsDAO();
     public abstract ExclusionDAO getExclusionsDAO();
-
+    public abstract SelectionDAO getSelectionDAO();
 
     //DB Connections
     public static AppDatabase databaseConnection(Context context){
