@@ -43,7 +43,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SelectionChangeListener {
 
     // logging purposes
     String TAG = "MAIN_ACTIVITY";
@@ -106,6 +106,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+        saveButton.setOnClickListener((v)->{
+            Intent intent = new Intent(this, ResultActivity.class);
+            intent.putExtra(Constants.RESULT_DATA, app.gson.toJson(selectionManager.getSelections()));
+            startActivity(intent);
+        });
 
         // if network available , request fresh data or load data from db
         if(isNetworkAvailable()){
@@ -302,5 +307,14 @@ public class MainActivity extends AppCompatActivity {
         if (networkProgress.isShowing()) networkProgress.dismiss();
     }
 
-
+    @Override
+    public void selectionChanged(Set<Selection> selections) {
+        Log.d(TAG, "onChanged is called");
+        if (selections.size()!=0 && selections.size()==features.size()){
+            saveButton.setVisibility(View.VISIBLE);
+        }
+        else{
+            saveButton.setVisibility(View.GONE);
+        }
+    }
 }
