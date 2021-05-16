@@ -4,6 +4,12 @@ ESPER ASSIGNMENT
 This Repo contains the source code for an App, which which makes an API call to fetch a list of
 Mobile phones and their features from the following URL. Some exclusions might also be present.
 
+INSTRUCTION
+1. Currently NetworkProgressDialog is not working, so you might need to wait 1-2 seconds on home
+   page so that data gets loaded.
+2. To run this project, either create a Apk by first Building the project , or run the app-debug.apk
+   present in same directory as Readme.md
+
 Entites
 1. Selection , has featureId and optionId column, depicts a selection which user can make
 2. Feature   , has meta data of feature
@@ -34,7 +40,7 @@ It is solely responsible for managing user selections, a selection is (featureId
 6. giving which optionId is selected for a featureId (currently from one feature only 1 option can be selected)
 7. Notifying to listener whenever there is a change (addition/removal) from the selection Set.
 8. VARIABLES
-1. Set<Selection> selections  , to store user selections (featureId, optionId)
+1. Set of selections  , to store user selections (featureId, optionId)
 2. exclusionMap               , a dict where each key is a selection and each value is a list of selections
                                  which are not available due to this selection(key)
 

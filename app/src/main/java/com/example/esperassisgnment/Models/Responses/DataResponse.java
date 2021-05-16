@@ -1,6 +1,5 @@
 package com.example.esperassisgnment.Models.Responses;
 
-import com.example.esperassisgnment.Models.Data;
 import com.google.gson.JsonArray;
 import com.google.gson.annotations.SerializedName;
 
