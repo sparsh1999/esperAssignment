@@ -5,6 +5,9 @@ import androidx.room.PrimaryKey;
 
 import com.example.esperassisgnment.Helpers.Constants;
 
+/**
+ * Meta data about Feature
+ */
 @Entity(tableName = Constants.FEATURE_TABLE)
 public class Feature {
     @PrimaryKey

@@ -10,6 +10,9 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
+/**
+ * contains featureId, optionId or a selection which user can select.
+ */
 @Entity(tableName = Constants.SELECTION_TABLE)
 public class Selection implements Serializable {
 

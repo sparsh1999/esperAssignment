@@ -35,10 +35,12 @@ SelectionManager , It is solely responsible for managing user selections, a sele
 8.1 Set<Selection> selections  , to store user selections (featureId, optionId)
 8.2 exclusionMap               , a dict where each key is a selection and each value is a list of selections
                                  which are not available due to this selection(key)
+
                                  Ex, say if some exclusions are [ [{1,4},{6,10}], [{1,4},{11, 15}] ]
                                  then when {1,4} is selected then , exclusionMap contains {{1,4}:[{6,10},{11, 15}]}
                                  so when you visit feature 6, then option 10 will be not clickable and dimmed
                                  and when you visit feature11 , then option 15 will be not clickable and dimmed
+
 SelectionChangeListener
 HomeActivity, registers with SelectionManager by implementing this listener interface
 to observe any changes in the selection set of selectionManager, selectionChanged() is invoked in such cases
@@ -52,6 +54,7 @@ OptionAdapter
 3. user can select all other options which does not have point2 or are available.
 4. calls SelectionManager internally, to notify about the selection or deletion.
 5. VARIABLES
+
 5.1 selectedOptionId,       it contains the optionId which is selected in the given list of options
                             for a featureId or if nothing selected then -1
 5.2 Set<Integer> exclusions contains a set of optionId which are not available due to conflict with other selections.

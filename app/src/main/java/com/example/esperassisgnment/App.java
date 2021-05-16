@@ -22,6 +22,8 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // initialize helper object one time...
         app = this;
         db = AppDatabase.databaseConnection(app);
         api = ApiManager.getInstance(app).service;

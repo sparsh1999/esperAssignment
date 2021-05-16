@@ -7,6 +7,9 @@ import com.example.esperassisgnment.Helpers.Constants;
 
 import java.io.Serializable;
 
+/**
+ * Meta Data about Option , contains a foreign key(not actual constraint) to feature table
+ */
 @Entity(tableName = Constants.OPTIONS_TABLE)
 public class Options implements Serializable {
     @PrimaryKey
