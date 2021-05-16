@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements SelectionChangeLi
     Button saveButton;
     // global list of features , for tabs
     List<Feature> features = new ArrayList<>();
-    // network progress or loading view (circle)
+    // network progress or loading view (circle) TODO it is not working currently
     ProgressDialog networkProgress ;
     // helper adapter for recyclerview
     OptionAdapter optionsAdapter;
@@ -78,7 +78,19 @@ public class MainActivity extends AppCompatActivity implements SelectionChangeLi
         recyclerView = findViewById(R.id.recyclerView);
         featureTabs = findViewById(R.id.featureTabs);
         saveButton = findViewById(R.id.saveButton);
+
+        // intialize Network/ loading progressDialog
         networkProgress = new ProgressDialog(this);
+        networkProgress.setTitle("Please Wait");
+        networkProgress.setMessage("Loading Data ....");
+        networkProgress.setCancelable(false);
+
+//        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+//        builder.setCancelable(false);
+//        builder.setView(R.layout.dialog_progress);
+//        networkProgress= builder.create();
+//        networkProgress.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
 
         // set the adapter , and a grid layout of span = 2
         optionsAdapter = new OptionAdapter(this, selectionManager);
@@ -267,7 +279,6 @@ public class MainActivity extends AppCompatActivity implements SelectionChangeLi
      *  with feature Names
      */
     private void loadFeatures(){
-        showNetworkProgress();
         FeatureDAO featureDAO = app.db.getFeatureDAO();
         List<Feature> features = featureDAO.getAllFeatures();
         if (features!=null){
@@ -275,7 +286,6 @@ public class MainActivity extends AppCompatActivity implements SelectionChangeLi
             this.features.addAll(features);
         }
         addTabs();
-        hideNetworkProgress();
     }
 
     // removes all tabs and add fresh tabs(features)
@@ -299,12 +309,11 @@ public class MainActivity extends AppCompatActivity implements SelectionChangeLi
 
 
     private void showNetworkProgress(){
-        Log.d(TAG, networkProgress.isShowing()+" ");
-        if (!networkProgress.isShowing()) networkProgress.show();
+        //if (!networkProgress.isShowing()) networkProgress.show();
     }
 
     private void hideNetworkProgress(){
-        if (networkProgress.isShowing()) networkProgress.dismiss();
+        //if (networkProgress.isShowing()) networkProgress.cancel();
     }
 
     @Override
