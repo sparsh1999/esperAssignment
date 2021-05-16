@@ -2,10 +2,10 @@ package com.example.esperassisgnment.Models.Entities;
 
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import com.example.esperassisgnment.Helpers.Constants;
-import com.example.esperassisgnment.Models.Selection;
 
 @Entity(tableName = Constants.EXCLUSION_TABLE)
 public class Exclusions {
@@ -25,6 +25,13 @@ public class Exclusions {
             parentColumns = "id", childColumns = "selection2Id")
     private int selection2Id;
 
+    public Exclusions(){}
+
+    @Ignore
+    public Exclusions(int selection1Id, int selection2Id){
+        this.selection1Id = selection1Id;
+        this.selection2Id = selection2Id;
+    }
     public int getId() {
         return id;
     }

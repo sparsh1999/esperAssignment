@@ -13,8 +13,9 @@ import com.example.esperassisgnment.Database.dao.SelectionDAO;
 import com.example.esperassisgnment.Models.Entities.Exclusions;
 import com.example.esperassisgnment.Models.Entities.Feature;
 import com.example.esperassisgnment.Models.Entities.Options;
+import com.example.esperassisgnment.Models.Entities.Selection;
 
-@Database(entities = {Feature.class, Options.class, Exclusions.class}, version = 1, exportSchema = false)
+@Database(entities = {Feature.class, Options.class, Exclusions.class, Selection.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     public static final String TAG = "AppDatabase";
 
