@@ -6,19 +6,22 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
-
+import android.view.View;
+import android.widget.Button;
 import com.example.esperassisgnment.Adapters.OptionAdapter;
 import com.example.esperassisgnment.App;
 import com.example.esperassisgnment.Database.dao.ExclusionDAO;
 import com.example.esperassisgnment.Database.dao.FeatureDAO;
 import com.example.esperassisgnment.Database.dao.OptionsDAO;
 import com.example.esperassisgnment.Database.dao.SelectionDAO;
+import com.example.esperassisgnment.Helpers.Constants;
+import com.example.esperassisgnment.Helpers.Listeners.SelectionChangeListener;
 import com.example.esperassisgnment.Helpers.SelectionManager;
-import com.example.esperassisgnment.Models.Data;
 import com.example.esperassisgnment.Models.Entities.Exclusions;
 import com.example.esperassisgnment.Models.Entities.Feature;
 import com.example.esperassisgnment.Models.Entities.Options;
@@ -34,6 +37,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -47,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
     TabLayout featureTabs;
     // recyclerview to show all options for a feature
     RecyclerView recyclerView;
+    // save button , which becomes available only when a option from each feature is selected
+    Button saveButton;
     // global list of features , for tabs
     List<Feature> features = new ArrayList<>();
     // network progress or loading view (circle)
@@ -68,25 +74,17 @@ public class MainActivity extends AppCompatActivity {
 
         // initialize !! initialize !!
         app = App.getAppInstance();
-        selectionManager = new SelectionManager();
+        selectionManager = new SelectionManager(this);
         recyclerView = findViewById(R.id.recyclerView);
         featureTabs = findViewById(R.id.featureTabs);
+        saveButton = findViewById(R.id.saveButton);
         networkProgress = new ProgressDialog(this);
 
         // set the adapter , and a grid layout of span = 2
-        optionsAdapter = new OptionAdapter(this);
+        optionsAdapter = new OptionAdapter(this, selectionManager);
         recyclerView.setAdapter(optionsAdapter);
         GridLayoutManager layoutManager = new GridLayoutManager(this,2);
         recyclerView.setLayoutManager(layoutManager);
-
-        // if network available , request fresh data or load data from db
-        if(isNetworkAvailable()){
-            Log.d(TAG, "Network is Available");
-            requestDataFromServer();
-        }
-        else{
-            loadFeatures();
-        }
 
         // TabSelectionListener to update options in Recyclerview for a selected Feature
         featureTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -107,6 +105,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+
+        // if network available , request fresh data or load data from db
+        if(isNetworkAvailable()){
+            Log.d(TAG, "Network is Available");
+            requestDataFromServer();
+        }
+        else{
+            loadFeatures();
+        }
     }
 
     @Override
@@ -129,18 +137,21 @@ public class MainActivity extends AppCompatActivity {
 
                     // TODO there should be some better way to parse exclusionResponse
                     if (dataResponse!=null) {
+                        showNetworkProgress();
                         for (JsonElement jsonElement: dataResponse.exclusionData){
                             if (jsonElement instanceof JsonArray){
-                                Log.d(TAG, jsonElement.toString()+" "+((JsonArray) jsonElement).size());
+                                Log.d(TAG, jsonElement.toString());
                                 List<Selection> exclusions = app.gson.fromJson(jsonElement,
                                         new TypeToken<List<Selection>>(){}.getType());
                                 dataResponse.exclusionResponses.add(new ExclusionResponse(exclusions));
+                                Log.d(TAG, exclusions.toString());
                             }
                         }
                         // after parsing , persist data to db
                         saveData(dataResponse);
                         // and finally refresh features
                         loadFeatures();
+                        hideNetworkProgress();
                     }
                     else{
                         Log.d(TAG, "Data Response is Empty or null");
@@ -166,7 +177,6 @@ public class MainActivity extends AppCompatActivity {
      */
     private void saveData(DataResponse response){
         // get all DAO objects
-        showNetworkProgress();
         ExclusionDAO exclusionDAO = app.db.getExclusionsDAO();
         SelectionDAO selectionDAO = app.db.getSelectionDAO();
         FeatureDAO featureDAO = app.db.getFeatureDAO();
@@ -198,13 +208,35 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // now add exclusions Data
+        Selection selection1;
+        Selection selection2;
+        int selectionId1;
+        int selectionId2;
+
         if (response.exclusionResponses!=null)
         for (ExclusionResponse exclusionResponse: response.exclusionResponses){
             if (exclusionResponse.exclusion!=null && exclusionResponse.exclusion.size()==2){
                 // insert both selections which cannot be included together
                 // and then populate a temp Table (Exclusion) to store the relationship
-                int selectionId1 = (int)selectionDAO.insert(exclusionResponse.exclusion.get(0));
-                int selectionId2 = (int)selectionDAO.insert(exclusionResponse.exclusion.get(0));
+                Selection selectionTemp ;
+                selection1 = exclusionResponse.exclusion.get(0);
+                selection2 = exclusionResponse.exclusion.get(1);
+
+                selectionTemp = selectionDAO.getSelection(selection1.featureId, selection1.optionId);
+                if (selectionTemp!=null){
+                    selectionId1 = selectionTemp.getId();
+                }
+                else{
+                    selectionId1 = (int)selectionDAO.insert(selection1);
+                }
+                selectionTemp = selectionDAO.getSelection(selection2.featureId, selection2.optionId);
+                if (selectionTemp!=null){
+                    selectionId2 = selectionTemp.getId();
+                }
+                else{
+                    selectionId2 = (int)selectionDAO.insert(selection2);
+                }
+
                 Exclusions exclusions = new Exclusions(selectionId1, selectionId2);
                 exclusionDAO.insert(exclusions);
             }
@@ -212,7 +244,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "exclusion Response is either null or <2");
             }
         }
-        hideNetworkProgress();
     }
 
     /**
@@ -223,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
     private void loadOptions(int featureId){
         OptionsDAO optionsDAO = app.db.getOptionsDAO();
         List<Options> options = optionsDAO.getAllOptionsForFeature(featureId);
-        optionsAdapter.updateOptions(options);
+        optionsAdapter.updateOptions(options, featureId);
     }
 
     /**
@@ -261,11 +292,15 @@ public class MainActivity extends AppCompatActivity {
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
+
     private void showNetworkProgress(){
+        Log.d(TAG, networkProgress.isShowing()+" ");
         if (!networkProgress.isShowing()) networkProgress.show();
     }
 
     private void hideNetworkProgress(){
-        if (networkProgress.isShowing()) networkProgress.hide();
+        if (networkProgress.isShowing()) networkProgress.dismiss();
     }
+
+
 }
