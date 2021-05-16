@@ -41,32 +41,45 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    RecyclerView recyclerView;
-    TabLayout featureTabs;
-    List<Data> dataList = new ArrayList<>();
-    List<Feature> features = new ArrayList<>();
-    ProgressDialog networkProgress ;
-    OptionAdapter optionsAdapter;
-    SelectionManager selectionManager;
-    App app;
+    // logging purposes
     String TAG = "MAIN_ACTIVITY";
+    // TabsLayout , to show all the features
+    TabLayout featureTabs;
+    // recyclerview to show all options for a feature
+    RecyclerView recyclerView;
+    // global list of features , for tabs
+    List<Feature> features = new ArrayList<>();
+    // network progress or loading view (circle)
+    ProgressDialog networkProgress ;
+    // helper adapter for recyclerview
+    OptionAdapter optionsAdapter;
+    // Application class instance to get static data
+    App app;
+
+    /**
+     * MAIN class to manages all selections and exclusions
+     */
+    SelectionManager selectionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // initialize !! initialize !!
         app = App.getAppInstance();
         selectionManager = new SelectionManager();
         recyclerView = findViewById(R.id.recyclerView);
         featureTabs = findViewById(R.id.featureTabs);
         networkProgress = new ProgressDialog(this);
 
+        // set the adapter , and a grid layout of span = 2
         optionsAdapter = new OptionAdapter(this);
         recyclerView.setAdapter(optionsAdapter);
         GridLayoutManager layoutManager = new GridLayoutManager(this,2);
         recyclerView.setLayoutManager(layoutManager);
 
+        // if network available , request fresh data or load data from db
         if(isNetworkAvailable()){
             Log.d(TAG, "Network is Available");
             requestDataFromServer();
@@ -75,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
             loadFeatures();
         }
 
+        // TabSelectionListener to update options in Recyclerview for a selected Feature
         featureTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -93,8 +107,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
     }
 
     @Override
@@ -103,6 +115,10 @@ public class MainActivity extends AppCompatActivity {
         hideNetworkProgress();
     }
 
+    /**
+     * uses Retrofit, fetches the data from server, if success , call saveData() to persist responses to db
+     * and finally refresh the feature Tabs
+     */
     private void requestDataFromServer(){
         showNetworkProgress();
         try {
@@ -121,7 +137,9 @@ public class MainActivity extends AppCompatActivity {
                                 dataResponse.exclusionResponses.add(new ExclusionResponse(exclusions));
                             }
                         }
+                        // after parsing , persist data to db
                         saveData(dataResponse);
+                        // and finally refresh features
                         loadFeatures();
                     }
                     else{
@@ -142,6 +160,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * utility func to persist data to db
+     * @param response
+     */
     private void saveData(DataResponse response){
         // get all DAO objects
         showNetworkProgress();
@@ -155,16 +177,20 @@ public class MainActivity extends AppCompatActivity {
         featureDAO.deleteAll();
         selectionDAO.deleteAll();
         // exclusions should automatically delete due to foreign key constraints !!! TODO CHECK
+
         // add features and options
         if (response.features!=null)
         for (FeatureResponse featureResponse: response.features){
+            // first feature
             Feature feature = new Feature();
             feature.setId(featureResponse.featureId);
             feature.setName(featureResponse.name);
             featureDAO.insert(feature);
 
+            // now options
             if (featureResponse.options!=null){
                 for (Options option: featureResponse.options){
+                    // set a foreign key to Feature
                     option.setFeatureId(feature.getId());
                     optionsDAO.insert(option);
                 }
@@ -172,10 +198,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // now add exclusions Data
-
         if (response.exclusionResponses!=null)
         for (ExclusionResponse exclusionResponse: response.exclusionResponses){
             if (exclusionResponse.exclusion!=null && exclusionResponse.exclusion.size()==2){
+                // insert both selections which cannot be included together
+                // and then populate a temp Table (Exclusion) to store the relationship
                 int selectionId1 = (int)selectionDAO.insert(exclusionResponse.exclusion.get(0));
                 int selectionId2 = (int)selectionDAO.insert(exclusionResponse.exclusion.get(0));
                 Exclusions exclusions = new Exclusions(selectionId1, selectionId2);
@@ -188,12 +215,21 @@ public class MainActivity extends AppCompatActivity {
         hideNetworkProgress();
     }
 
+    /**
+     * called by PageChangeListener of Tab, whenever a feature is selected
+     * updates the same adapter with the new set of options
+     * @param featureId
+     */
     private void loadOptions(int featureId){
         OptionsDAO optionsDAO = app.db.getOptionsDAO();
         List<Options> options = optionsDAO.getAllOptionsForFeature(featureId);
         optionsAdapter.updateOptions(options);
     }
 
+    /**
+     *  assumes saveData is successful and then loads all the features , calls addTab to populates tabs
+     *  with feature Names
+     */
     private void loadFeatures(){
         showNetworkProgress();
         FeatureDAO featureDAO = app.db.getFeatureDAO();
@@ -206,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
         hideNetworkProgress();
     }
 
-
+    // removes all tabs and add fresh tabs(features)
     private void addTabs(){
         featureTabs.removeAllTabs();
         for (Feature feature: features){
@@ -214,6 +250,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * utility function to check Network availability
+     * @return true if connected or false
+     */
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
