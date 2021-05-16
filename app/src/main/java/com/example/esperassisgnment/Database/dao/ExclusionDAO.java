@@ -6,7 +6,7 @@ import androidx.room.Query;
 
 import com.example.esperassisgnment.Helpers.Constants;
 import com.example.esperassisgnment.Models.Entities.Exclusions;
-import com.example.esperassisgnment.Models.Selection;
+import com.example.esperassisgnment.Models.Entities.Selection;
 
 import java.util.List;
 
@@ -16,9 +16,11 @@ public interface ExclusionDAO {
     void insert(Exclusions... exclusions);
 
     @Query(value =
-            "SELECT selection1Id FROM "+ Constants.EXCLUSION_TABLE+" WHERE selection2Id=:selectionId " +
+            "SELECT SEC.* FROM ( "+
+            "SELECT selection1Id selectionId FROM "+ Constants.EXCLUSION_TABLE+" WHERE selection2Id=:selectionId " +
             "UNION " +
-            "SELECT selection2Id FROM "+ Constants.EXCLUSION_TABLE+" WHERE selection1Id=:selectionId "
+            "SELECT selection2Id selectionId FROM "+ Constants.EXCLUSION_TABLE+" WHERE selection1Id=:selectionId "+
+            " )A JOIN "+Constants.SELECTION_TABLE +" SEC ON SEC.id = A.selectionId"
           )
     List<Selection> getNotAllowedSelections(int selectionId);
 
