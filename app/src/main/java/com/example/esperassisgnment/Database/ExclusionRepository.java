@@ -1,5 +1,7 @@
 package com.example.esperassisgnment.Database;
 
+import android.util.Log;
+
 import com.example.esperassisgnment.App;
 import com.example.esperassisgnment.Database.dao.ExclusionDAO;
 import com.example.esperassisgnment.Database.dao.SelectionDAO;
@@ -22,6 +24,12 @@ public class ExclusionRepository {
 
         if (selection!=null){
             excludedSelections = exclusionDAO.getNotAllowedSelections(selection.getId());
+        }
+
+        if (excludedSelections!=null)
+        Log.d("someting ", excludedSelections.toString());
+        else{
+            Log.d("null received ", "for selectionId "+featureId+" "+optionId);
         }
 
         return excludedSelections;

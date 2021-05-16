@@ -1,17 +1,23 @@
 package com.example.esperassisgnment.Models.Entities;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import com.example.esperassisgnment.Helpers.Constants;
+import com.google.gson.annotations.SerializedName;
+
+import java.io.Serializable;
 
 @Entity(tableName = Constants.SELECTION_TABLE)
-public class Selection {
+public class Selection implements Serializable {
 
     @PrimaryKey(autoGenerate = true)
     private int id;
+    @SerializedName(value = "feature_id")
     public int featureId;
+    @SerializedName(value = "options_id")
     public int optionId;
 
     public int getId() {
@@ -56,5 +62,11 @@ public class Selection {
                 return true;
         }
         return false ;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "featureId "+getFeatureId()+" optionId "+getOptionId();
     }
 }
