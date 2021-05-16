@@ -1,8 +1,16 @@
 package com.example.esperassisgnment.Helpers;
 
+import android.util.Log;
+
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import com.example.esperassisgnment.Database.ExclusionRepository;
+import com.example.esperassisgnment.Helpers.Listeners.SelectionChangeListener;
+import com.example.esperassisgnment.Models.Entities.Options;
 import com.example.esperassisgnment.Models.Entities.Selection;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -15,21 +23,32 @@ import java.util.concurrent.ConcurrentHashMap;
  * exclusionMap , map where key is selection and value is the selections which needs to be excluded due
  * to the key selection.
  */
-public class SelectionManager {
+public class SelectionManager{
 
+    String TAG = "SELECTION_MANAGER";
     Set<Selection> selections = new HashSet<>();
     ConcurrentHashMap<Selection, Set<Selection>> exclusionMap = new ConcurrentHashMap<>();
 
     ExclusionRepository exclusionRepo;
 
-    public SelectionManager(){
+    // It could be a list as well
+    SelectionChangeListener listener;
+
+    public Set<Selection> getSelections() {
+        return selections;
+    }
+
+    public SelectionManager(SelectionChangeListener listener){
         exclusionRepo = new ExclusionRepository();
+        this.listener = listener;
     }
 
     /**
      * add a selection to selectionSet
-     * if another option is already selected for the same feature , then resets it and also clears
-     * also adds exclusions due to current selection
+     * if another option is already selected for the same feature , then resets it by calling removeSelection()
+     * and also clears previous exclusion due to that option
+     * finally adds exclusions due to current selection
+     * and notifies listener about the change
      * @param featureId
      * @param optionId
      */
@@ -46,6 +65,10 @@ public class SelectionManager {
         // now selection and exclusions can be added safely
         addExclusions(selectionObj);
         selections.add(selectionObj);
+
+        printData();
+
+        listener.selectionChanged(selections);
     }
 
     /**
@@ -58,9 +81,11 @@ public class SelectionManager {
         List<Selection> excludedSelections = exclusionRepo.
                 getAllExclusionsForASelection(selectionObj.getFeatureId(), selectionObj.getOptionId());
 
+        if (excludedSelections!=null)
+        Log.d(TAG, "excludedSelections " + excludedSelections.toString());
         // initialize exclusion set
         if (exclusionMap.get(selectionObj)==null){
-            exclusionMap.put(selectionObj, new HashSet<Selection>());
+            exclusionMap.put(selectionObj, new HashSet<>());
         }
 
         // add all exclusions to the exclusionMap for this selection
@@ -72,6 +97,7 @@ public class SelectionManager {
 
     /**
      * removes the selection from selectionSet and also removes exclusions due to this selection
+     * and notifes listener about the change
      * @param featureId
      * @param optionId
      */
@@ -83,6 +109,7 @@ public class SelectionManager {
         // now remove entries from exclusion due to this featureId and optionId
         removeExclusions();
 
+        listener.selectionChanged(selections);
     }
 
     /**
@@ -105,6 +132,40 @@ public class SelectionManager {
     }
 
 
+    /**
+     * returns which selections are not allowed for this featureId , due to other selections in other featureId
+     * @param featureId
+     * @return
+     */
+    public Set<Integer> getExclusions(int featureId){
+        Set<Integer> exclusions= new HashSet<>();
+        for (Map.Entry<Selection, Set<Selection>> entry: exclusionMap.entrySet()){
+            if (entry.getKey().featureId!=featureId){
+                for (Selection selection: entry.getValue()){
+                    if (selection.featureId == featureId){
+                        exclusions.add(selection.optionId);
+                    }
+                }
+            }
+        }
+        return exclusions;
+    }
+
+    /**
+     * get already selected optionId for this featureId
+     * @param featureId
+     * @return
+     */
+    public int getSelections(int featureId){
+        List<Selection> selections= new ArrayList<>();
+        for (Map.Entry<Selection, Set<Selection>> entry: exclusionMap.entrySet()){
+            if (entry.getKey().featureId==featureId){
+                return entry.getKey().optionId;
+            }
+        }
+        return -1;
+    }
+
     private Selection checkIfFeatureAlreadySelectedWithDifferentOption(int featureId){
         for (Selection selection : selections){
             if (selection.featureId==featureId){
@@ -112,5 +173,10 @@ public class SelectionManager {
             }
         }
         return null;
+    }
+
+    private void printData(){
+        Log.d(TAG, "selections "+selections.toString());
+        Log.d(TAG, "exclusions "+exclusionMap.toString());
     }
 }
