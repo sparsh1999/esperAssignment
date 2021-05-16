@@ -1,28 +1,60 @@
-Unstaged changes after reset:
-M	app/build.gradle
-M	app/src/main/AndroidManifest.xml
-M	app/src/main/java/com/example/esperassisgnment/Activity/MainActivity.java
-M	app/src/main/java/com/example/esperassisgnment/Adapters/OptionAdapter.java
-M	app/src/main/java/com/example/esperassisgnment/App.java
-M	app/src/main/java/com/example/esperassisgnment/Database/AppDatabase.java
-M	app/src/main/java/com/example/esperassisgnment/Database/ExclusionRepository.java
-M	app/src/main/java/com/example/esperassisgnment/Database/dao/ExclusionDAO.java
-M	app/src/main/java/com/example/esperassisgnment/Database/dao/FeatureDAO.java
-M	app/src/main/java/com/example/esperassisgnment/Database/dao/OptionsDAO.java
-M	app/src/main/java/com/example/esperassisgnment/Database/dao/SelectionDAO.java
-M	app/src/main/java/com/example/esperassisgnment/Helpers/Constants.java
-M	app/src/main/java/com/example/esperassisgnment/Helpers/SelectionManager.java
-M	app/src/main/java/com/example/esperassisgnment/Models/Data.java
-M	app/src/main/java/com/example/esperassisgnment/Models/Entities/Exclusions.java
-M	app/src/main/java/com/example/esperassisgnment/Models/Entities/Feature.java
-M	app/src/main/java/com/example/esperassisgnment/Models/Entities/Options.java
-M	app/src/main/java/com/example/esperassisgnment/Models/Entities/Selection.java
-M	app/src/main/java/com/example/esperassisgnment/Models/Responses/DataResponse.java
-M	app/src/main/java/com/example/esperassisgnment/Models/Responses/ExclusionResponse.java
-M	app/src/main/java/com/example/esperassisgnment/Models/Responses/FeatureResponse.java
-D	app/src/main/java/com/example/esperassisgnment/Models/Selection.java
-M	app/src/main/java/com/example/esperassisgnment/Network/ApiManager.java
-M	app/src/main/java/com/example/esperassisgnment/Network/ApiService.java
-M	app/src/main/res/layout/activity_main.xml
-M	app/src/main/res/layout/content_main.xml
-M	app/src/main/res/layout/feature_layout.xml
+package com.example.esperassisgnment.Models.Entities;
+
+import androidx.annotation.Nullable;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+import com.example.esperassisgnment.Helpers.Constants;
+
+@Entity(tableName = Constants.SELECTION_TABLE)
+public class Selection {
+
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+    public int featureId;
+    public int optionId;
+
+    public int getId() {
+        return id;
+    }
+
+    public int getFeatureId() {
+        return featureId;
+    }
+
+    public int getOptionId() {
+        return optionId;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setFeatureId(int featureId) {
+        this.featureId = featureId;
+    }
+
+    public void setOptionId(int optionId) {
+        this.optionId = optionId;
+    }
+
+    public Selection(int featureId, int optionId){
+        this.featureId = featureId;
+        this.optionId = optionId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.parseInt(this.featureId+"0"+this.optionId);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (obj instanceof Selection){
+            Selection selection = (Selection)obj;
+            if (selection.optionId==this.optionId && selection.featureId==this.featureId)
+                return true;
+        }
+        return false ;
+    }
+}
