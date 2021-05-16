@@ -1,14 +1,10 @@
 package com.example.esperassisgnment.Helpers;
 
 import com.example.esperassisgnment.Database.ExclusionRepository;
-import com.example.esperassisgnment.Models.Entities.Exclusions;
-import com.example.esperassisgnment.Models.Selection;
+import com.example.esperassisgnment.Models.Entities.Selection;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;

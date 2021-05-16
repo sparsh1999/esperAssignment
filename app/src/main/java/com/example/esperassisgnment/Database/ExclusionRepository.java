@@ -3,7 +3,7 @@ package com.example.esperassisgnment.Database;
 import com.example.esperassisgnment.App;
 import com.example.esperassisgnment.Database.dao.ExclusionDAO;
 import com.example.esperassisgnment.Database.dao.SelectionDAO;
-import com.example.esperassisgnment.Models.Selection;
+import com.example.esperassisgnment.Models.Entities.Selection;
 import java.util.List;
 
 public class ExclusionRepository {
