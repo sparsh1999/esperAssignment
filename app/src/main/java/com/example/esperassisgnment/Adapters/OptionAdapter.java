@@ -69,6 +69,7 @@ public class OptionAdapter extends RecyclerView.Adapter<OptionAdapter.OptionView
     }
 
     public void updateOptions(List<Options> options){
+        if (options==null) return;
         this.options.clear();
         this.options.addAll(options);
         notifyDataSetChanged();
